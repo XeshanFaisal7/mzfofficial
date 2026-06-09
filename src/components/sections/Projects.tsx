@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, MousePointerClick, Sparkles } from "lucide-r
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { PROJECTS } from "@/data/portfolio";
+import { tapLiftProps, useMotionProfile } from "@/hooks/useMotionProfile";
+import { cardEntrance } from "@/lib/motion";
 
 const PREVIEW_COUNT = 4;
 
@@ -36,6 +38,7 @@ function ResponsibilityList({ items }: { items: readonly string[] }) {
 }
 
 export function ProjectsSection() {
+  const { richMotion, reducedMotion, lite3d } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -160,18 +163,21 @@ export function ProjectsSection() {
 
         <div
           ref={scrollRef}
+          data-lenis-prevent
           className="flex snap-x snap-mandatory gap-8 overflow-x-auto px-8 pb-6 pt-8 [scrollbar-width:none] md:gap-10 md:px-[max(32px,calc(50vw-38rem))] [&::-webkit-scrollbar]:hidden"
         >
-          {PROJECTS.map((p, idx) => (
+          {PROJECTS.map((p, idx) => {
+            const entrance = cardEntrance(reducedMotion, lite3d, idx);
+            return (
             <motion.article
               key={p.title}
               draggable={false}
-              initial={{ opacity: 0, x: 70, rotateY: -10 }}
-              whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+              initial={entrance.initial}
+              whileInView={entrance.whileInView}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ type: "spring", stiffness: 120, damping: 18, delay: Math.min(idx * 0.05, 0.4) }}
-              whileHover={{ y: -4, transition: { type: "spring", stiffness: 260, damping: 20 } }}
-              className="surface-card relative flex w-[82vw] max-w-xl shrink-0 snap-center flex-col overflow-hidden transition hover:border-teal-200/25"
+              transition={entrance.transition}
+              {...tapLiftProps(richMotion)}
+              className="surface-card relative flex w-[82vw] max-w-xl shrink-0 snap-center flex-col overflow-hidden transition hover:border-teal-200/25 active:border-teal-200/25"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_-20%,rgba(45,212,191,0.32),transparent_55%)]" aria-hidden />
 
@@ -206,7 +212,8 @@ export function ProjectsSection() {
                 <ResponsibilityList items={p.responsibilities} />
               </div>
             </motion.article>
-          ))}
+          );
+          })}
         </div>
       </div>
     </section>

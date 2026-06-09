@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { BrandLogo } from "@/components/BrandLogo";
 import { MagneticButton } from "@/components/MagneticButton";
 import { QUICK_LINKS, SITE, SOCIAL_LINKS } from "@/data/portfolio";
+import { useMotionProfile, tapLiftProps } from "@/hooks/useMotionProfile";
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -23,6 +24,8 @@ const SOCIAL_ICONS: Record<(typeof SOCIAL_LINKS)[number]["key"], ComponentType<{
 };
 
 export function FooterSection({ scrollTo }: { scrollTo: (hash: string) => void }) {
+  const { richMotion } = useMotionProfile();
+
   return (
     <footer className="relative border-t border-white/[0.08] px-4 py-20 md:px-8">
       <div className="pointer-events-none absolute inset-x-[20%] -top-[120px] h-[200px] bg-gradient-to-t from-teal-500/[0.06] to-transparent blur-3xl" aria-hidden />
@@ -33,7 +36,7 @@ export function FooterSection({ scrollTo }: { scrollTo: (hash: string) => void }
             <MagneticButton strength={0.2}>
               <motion.button
                 type="button"
-                whileHover={{ y: -2 }}
+                {...tapLiftProps(richMotion, { hoverY: -2 })}
                 onClick={() => scrollTo("#hero")}
                 className="group flex min-h-[52px] items-center gap-4 text-left"
               >

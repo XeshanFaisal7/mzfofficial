@@ -10,6 +10,7 @@ export type CyberWorkspaceProps = {
   bloom?: boolean;
   particles?: number;
   stars?: number;
+  lite?: boolean;
 };
 
 function WorkspaceParticles({ count }: { count: number }) {
@@ -46,10 +47,20 @@ function WorkspaceParticles({ count }: { count: number }) {
   );
 }
 
-function HologramPanel({ position, color, scale = 1 }: { position: [number, number, number]; color: string; scale?: number }) {
+function HologramPanel({
+  position,
+  color,
+  scale = 1,
+  animated = true,
+}: {
+  position: [number, number, number];
+  color: string;
+  scale?: number;
+  animated?: boolean;
+}) {
   const ref = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
-    if (!ref.current) return;
+    if (!animated || !ref.current) return;
     const t = clock.elapsedTime;
     ref.current.position.y = position[1] + Math.sin(t * 0.8 + position[0]) * 0.08;
     ref.current.rotation.z = Math.sin(t * 0.35) * 0.04;
@@ -70,19 +81,20 @@ function Monitor({
   rotation,
   emissive,
   size,
+  animated = true,
 }: {
   position: [number, number, number];
   rotation?: [number, number, number];
   emissive: string;
   size: [number, number];
+  animated?: boolean;
 }) {
   const screen = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
+    if (!animated || !screen.current) return;
     const t = clock.elapsedTime;
-    if (screen.current) {
-      const mat = screen.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.05 + Math.sin(t * 3.1) * 0.22 + Math.sin(t * 17.5) * 0.06;
-    }
+    const mat = screen.current.material as THREE.MeshStandardMaterial;
+    mat.emissiveIntensity = 1.05 + Math.sin(t * 3.1) * 0.22 + Math.sin(t * 17.5) * 0.06;
   });
 
   return (
@@ -106,7 +118,12 @@ function Monitor({
 }
 
 /** Stylized cinematic developer + workspace (no cheap cartoon — premium silhouettes). */
-export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars = 1400 }: CyberWorkspaceProps) {
+export function CyberDeveloperWorkspace({
+  bloom = true,
+  particles = 900,
+  stars = 1400,
+  lite = false,
+}: CyberWorkspaceProps) {
   const { scrollPhase } = useHeroExperience();
   const phaseRef = useRef(scrollPhase);
   useEffect(() => {
@@ -129,7 +146,8 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
   useLayoutEffect(() => {
     if (!sceneRoot.current) return;
     const g = sceneRoot.current;
-    g.scale.setScalar(0.96);
+    g.scale.setScalar(lite ? 0.98 : 0.96);
+    if (lite) return;
     gsap.to(g.scale, {
       x: 0.98,
       y: 0.98,
@@ -138,7 +156,7 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
       ease: "power3.out",
       delay: 0.06,
     });
-  }, []);
+  }, [lite]);
 
   useFrame(({ camera, clock, scene, pointer, size }) => {
     const t = clock.elapsedTime;
@@ -220,9 +238,9 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
       <pointLight ref={rimRef} position={[-3.4, 0.4, 2.4]} intensity={0.95} color="#c4b5fd" distance={22} decay={2} />
       <pointLight ref={deskRef} position={[0.2, -1.95, 3.95]} intensity={0} color="#38bdf8" distance={14} decay={2} />
 
-      <Stars radius={72} depth={54} count={stars} factor={4} saturation={0.14} fade speed={0.9} />
+      {stars > 0 ? <Stars radius={72} depth={54} count={stars} factor={4} saturation={0.14} fade speed={0.9} /> : null}
 
-      <WorkspaceParticles count={particles} />
+      {particles > 0 ? <WorkspaceParticles count={particles} /> : null}
 
       <group ref={sceneRoot} position={[0.68, 0, 0]}>
         {/* Floor */}
@@ -242,9 +260,9 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
             <meshStandardMaterial color="#0a1024" metalness={0.5} roughness={0.55} />
           </mesh>
 
-          <Monitor position={[-0.82, 0.58, -0.18]} rotation={[-0.06, 0.16, 0]} emissive="#14b8a6" size={[0.88, 0.5]} />
-          <Monitor position={[0.52, 0.62, 0.06]} rotation={[-0.04, -0.1, 0]} emissive="#22d3ee" size={[1.08, 0.62]} />
-          <Monitor position={[1.28, 0.48, -0.12]} rotation={[0.02, -0.28, 0]} emissive="#a78bfa" size={[0.42, 0.56]} />
+          <Monitor animated={!lite} position={[-0.82, 0.58, -0.18]} rotation={[-0.06, 0.16, 0]} emissive="#14b8a6" size={[0.88, 0.5]} />
+          <Monitor animated={!lite} position={[0.52, 0.62, 0.06]} rotation={[-0.04, -0.1, 0]} emissive="#22d3ee" size={[1.08, 0.62]} />
+          <Monitor animated={!lite} position={[1.28, 0.48, -0.12]} rotation={[0.02, -0.28, 0]} emissive="#a78bfa" size={[0.42, 0.56]} />
 
           <mesh position={[0.35, -0.02, 0.55]} rotation={[1.52, 0, 0.05]}>
             <boxGeometry args={[1.08, 0.06, 0.38]} />
@@ -302,7 +320,7 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
             </group>
           </group>
 
-          <TypingArms />
+          <TypingArms animated={!lite} />
 
           {/* Laptop on desk in front of developer */}
           <group position={[0.08, -0.02, 0.38]} rotation={[-1.48, 0, 0]}>
@@ -317,12 +335,21 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
           </group>
         </group>
 
-        <Float rotationIntensity={0.35} floatIntensity={0.55} speed={1.2}>
-          <HologramPanel position={[-1.62, -0.2, 2.08]} color="#67f5dd" scale={1.08} />
-        </Float>
-        <Float rotationIntensity={0.28} floatIntensity={0.48} speed={1.05}>
-          <HologramPanel position={[1.52, -0.85, 2.72]} color="#38bdf8" />
-        </Float>
+        {lite ? (
+          <>
+            <HologramPanel animated={false} position={[-1.62, -0.2, 2.08]} color="#67f5dd" scale={1.08} />
+            <HologramPanel animated={false} position={[1.52, -0.85, 2.72]} color="#38bdf8" />
+          </>
+        ) : (
+          <>
+            <Float rotationIntensity={0.35} floatIntensity={0.55} speed={1.2}>
+              <HologramPanel position={[-1.62, -0.2, 2.08]} color="#67f5dd" scale={1.08} />
+            </Float>
+            <Float rotationIntensity={0.28} floatIntensity={0.48} speed={1.05}>
+              <HologramPanel position={[1.52, -0.85, 2.72]} color="#38bdf8" />
+            </Float>
+          </>
+        )}
       </group>
 
       <PostFX enabled={bloom} />
@@ -331,12 +358,13 @@ export function CyberDeveloperWorkspace({ bloom = true, particles = 900, stars =
 }
 
 /** Cheap typing motion on forearms — read from clock inside useFrame. */
-function TypingArms() {
+function TypingArms({ animated = true }: { animated?: boolean }) {
   const left = useRef<THREE.Mesh>(null);
   const right = useRef<THREE.Mesh>(null);
   const mouseArm = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
+    if (!animated) return;
     const k = clock.elapsedTime * 10.5;
     if (left.current) left.current.rotation.x = 0.28 + Math.sin(k) * 0.11;
     if (right.current) right.current.rotation.x = 0.22 + Math.sin(k + 1.1) * 0.12;

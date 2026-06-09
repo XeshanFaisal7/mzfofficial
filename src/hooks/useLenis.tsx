@@ -20,7 +20,8 @@ export function SmoothScroll({
   useEffect(() => {
     if (!enabled) return;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (prefersReducedMotion || coarsePointer) {
       setLenis(null);
       return;
     }

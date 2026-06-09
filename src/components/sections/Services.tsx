@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import type { JSX } from "react";
 import { SERVICES } from "@/data/portfolio";
+import { useMotionProfile } from "@/hooks/useMotionProfile";
 
 const ICONS: Record<(typeof SERVICES)[number]["icon"], JSX.Element> = {
   layers: <Layers className="h-6 w-6" aria-hidden />,
@@ -24,6 +25,8 @@ const ICONS: Record<(typeof SERVICES)[number]["icon"], JSX.Element> = {
 };
 
 export function ServicesSection() {
+  const { richMotion, reducedMotion } = useMotionProfile();
+
   return (
     <section id="services" className="relative px-4 py-28 md:px-8">
       <div className="mx-auto max-w-6xl space-y-12">
@@ -43,12 +46,13 @@ export function ServicesSection() {
           {SERVICES.map((s, idx) => (
             <motion.article
               key={s.title}
-              initial={{ opacity: 0, y: 22 }}
+              initial={{ opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-6%" }}
-              transition={{ duration: 0.45, delay: idx * 0.035 }}
-              whileHover={{ translateY: -3 }}
-              className="surface-card group relative px-9 py-8 transition hover:border-teal-200/25"
+              transition={{ duration: reducedMotion ? 0 : 0.45, delay: idx * 0.035 }}
+              whileHover={richMotion ? { y: -3 } : undefined}
+              whileTap={{ scale: 0.985, y: -2 }}
+              className="surface-card group relative px-9 py-8 transition hover:border-teal-200/25 active:border-teal-200/25"
             >
               <div className="relative flex gap-6">
                 <div className="flex h-16 w-16 items-center justify-center rounded-surface-lg bg-teal-400/12 text-teal-50">

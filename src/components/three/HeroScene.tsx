@@ -27,8 +27,10 @@ function detectQuality(): Quality {
   const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const lowMem = typeof deviceMemory === "number" && deviceMemory < 8;
 
-  if (coarse || reduced) {
-    return { bloom: false, particles: 120, stars: 200, dpr: [1, 1] };
+  const narrow = window.matchMedia("(max-width: 767px)").matches;
+
+  if (coarse || reduced || narrow) {
+    return { bloom: false, particles: 48, stars: 0, dpr: [1, 1] };
   }
 
   if (lowCpu || lowMem) {
@@ -69,7 +71,7 @@ export function HeroCanvas() {
   return (
     <div
       ref={rootRef}
-      className="absolute inset-0 z-0 [&_canvas]:!block [&_canvas]:h-full [&_canvas]:w-full"
+      className="pointer-events-none absolute inset-0 z-0 [&_canvas]:!block [&_canvas]:h-full [&_canvas]:w-full"
     >
       <Canvas
         dpr={quality.dpr}
@@ -81,13 +83,13 @@ export function HeroCanvas() {
           toneMapping: THREE.ACESFilmicToneMapping,
         }}
         shadows={false}
-        style={{ touchAction: "none" }}
       >
         <Suspense fallback={null}>
           <CyberDeveloperWorkspace
             bloom={quality.bloom}
             particles={quality.particles}
             stars={quality.stars}
+            lite={quality.stars === 0}
           />
         </Suspense>
       </Canvas>

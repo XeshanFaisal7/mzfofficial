@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Github, Linkedin, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { MagneticButton } from "@/components/MagneticButton";
@@ -15,7 +16,7 @@ export function Navbar({ scrollTo }: { scrollTo: (h: string) => void }) {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 py-5 md:px-8">
-      <div className="pointer-events-auto mx-auto max-w-6xl rounded-pill border border-white/[0.08] bg-[hsl(var(--glass)/0.55)] shadow-[0_16px_64px_-32px_black] backdrop-blur-2xl">
+      <div className="pointer-events-auto mx-auto max-w-6xl rounded-pill border border-white/[0.08] bg-[hsl(var(--glass)/0.55)] shadow-[0_16px_64px_-32px_black] backdrop-blur-xl md:backdrop-blur-2xl">
         <div className="flex items-center justify-between gap-2 px-3 py-2">
           <button
             type="button"
@@ -48,7 +49,7 @@ export function Navbar({ scrollTo }: { scrollTo: (h: string) => void }) {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
-              className="inline-flex rounded-surface-md border border-white/10 p-2.5 text-white/75 transition hover:bg-white/[0.06] hover:text-white xl:hidden"
+              className="touch-press inline-flex rounded-surface-md border border-white/10 p-2.5 text-white/75 transition hover:bg-white/[0.06] hover:text-white active:bg-white/[0.08] active:text-white xl:hidden"
             >
               {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
             </button>
@@ -70,26 +71,38 @@ export function Navbar({ scrollTo }: { scrollTo: (h: string) => void }) {
           </div>
         </div>
 
-        {menuOpen ? (
-          <nav
-            className="border-t border-white/[0.08] px-3 py-3 xl:hidden"
-            aria-label="Mobile navigation"
-          >
-            <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3">
-              {NAV_LINKS.map((link) => (
-                <li key={link.hash}>
-                  <button
-                    type="button"
-                    onClick={() => navigate(link.hash)}
-                    className="w-full rounded-surface-md px-3 py-2.5 text-left text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white"
+        <AnimatePresence initial={false}>
+          {menuOpen ? (
+            <motion.nav
+              key="mobile-nav"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden border-t border-white/[0.08] xl:hidden"
+              aria-label="Mobile navigation"
+            >
+              <ul className="grid grid-cols-2 gap-1 px-3 py-3 sm:grid-cols-3">
+                {NAV_LINKS.map((link, idx) => (
+                  <motion.li
+                    key={link.hash}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.03, duration: 0.22 }}
                   >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
+                    <button
+                      type="button"
+                      onClick={() => navigate(link.hash)}
+                      className="touch-press w-full rounded-surface-md px-3 py-2.5 text-left text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white active:bg-white/[0.08] active:text-white"
+                    >
+                      {link.label}
+                    </button>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.nav>
+          ) : null}
+        </AnimatePresence>
       </div>
     </header>
   );

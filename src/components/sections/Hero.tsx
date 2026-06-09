@@ -4,12 +4,14 @@ import { ArrowDownRight, Cpu, Radar } from "lucide-react";
 import { MagneticButton } from "@/components/MagneticButton";
 import { Button } from "@/components/ui/button";
 import { HERO_ROLES, SITE } from "@/data/portfolio";
+import { useMotionProfile } from "@/hooks/useMotionProfile";
 
 const HeroCanvas = lazy(() =>
   import("@/components/three/HeroScene").then((m) => ({ default: m.HeroCanvas }))
 );
 
 export function Hero({ scrollTo }: { scrollTo: (h: string) => void }) {
+  const { richMotion, narrowViewport } = useMotionProfile();
   const [roleIndex, setRoleIndex] = useState(0);
 
   useEffect(() => {
@@ -28,8 +30,8 @@ export function Hero({ scrollTo }: { scrollTo: (h: string) => void }) {
 
       {/* Static light pools — avoids expensive animated blur repaints */}
       <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden>
-        <div className="absolute left-[-14%] top-[22%] h-[380px] w-[380px] rounded-full bg-teal-400/14 blur-[80px] md:h-[460px] md:w-[460px]" />
-        <div className="absolute right-[-18%] top-[6%] h-[440px] w-[440px] rounded-full bg-violet-500/10 blur-[80px]" />
+        <div className="absolute left-[-14%] top-[22%] h-[280px] w-[280px] rounded-full bg-teal-400/14 blur-[48px] md:h-[460px] md:w-[460px] md:blur-[80px]" />
+        <div className="absolute right-[-18%] top-[6%] h-[300px] w-[300px] rounded-full bg-violet-500/10 blur-[48px] md:h-[440px] md:w-[440px] md:blur-[80px]" />
       </div>
 
       <div
@@ -37,9 +39,11 @@ export function Hero({ scrollTo }: { scrollTo: (h: string) => void }) {
         aria-hidden
       />
 
-      <Suspense fallback={null}>
-        <HeroCanvas />
-      </Suspense>
+      {!narrowViewport ? (
+        <Suspense fallback={null}>
+          <HeroCanvas />
+        </Suspense>
+      ) : null}
 
       {/* Left-heavy fade — keeps copy readable; 3D developer stays on the right */}
       <div
@@ -156,15 +160,15 @@ export function Hero({ scrollTo }: { scrollTo: (h: string) => void }) {
         type="button"
         aria-label="Scroll to projects"
         onClick={() => scrollTo("#projects")}
-        className="absolute bottom-6 right-4 z-20 flex flex-col items-end gap-3 md:bottom-8 md:right-8 lg:right-[max(2rem,calc((100vw-80rem)/2+2rem))]"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ repeat: Infinity, duration: 2.4 }}
+        className="touch-press absolute bottom-6 right-4 z-20 flex flex-col items-end gap-3 md:bottom-8 md:right-8 lg:right-[max(2rem,calc((100vw-80rem)/2+2rem))]"
+        animate={richMotion ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.75 }}
+        transition={richMotion ? { repeat: Infinity, duration: 2.4 } : { duration: 0 }}
       >
         <span className="section-label text-right text-white/45">Scroll to explore</span>
         <motion.span
           className="h-16 w-[2px] rounded-pill bg-gradient-to-b from-teal-200/80 via-white/70 to-transparent"
-          animate={{ scaleY: [0.94, 1, 0.94] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          animate={richMotion ? { scaleY: [0.94, 1, 0.94] } : { scaleY: 1 }}
+          transition={richMotion ? { repeat: Infinity, duration: 2 } : { duration: 0 }}
           aria-hidden
         />
       </motion.button>

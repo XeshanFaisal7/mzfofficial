@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { OrbitIcon } from "lucide-react";
 import { SKILLS, type SkillCategory } from "@/data/portfolio";
 import { SkillLogo } from "@/components/skills/SkillLogo";
+import { useMotionProfile } from "@/hooks/useMotionProfile";
 const ORDER: SkillCategory[] = [
   "Frontend",
   "Backend",
@@ -14,6 +15,7 @@ const ORDER: SkillCategory[] = [
 ];
 
 export function SkillsSection() {
+  const { richMotion } = useMotionProfile();
   const [active, setActive] = useState<SkillCategory>("Frontend");
   const items = SKILLS[active];
   const orbit = useMemo(() => [...items], [items]);
@@ -39,7 +41,10 @@ export function SkillsSection() {
           </div>
         </div>
 
-        <div className="mt-14 flex snap-x gap-3 overflow-x-auto pb-6 md:flex-wrap md:overflow-visible [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          data-lenis-prevent
+          className="mt-14 flex snap-x gap-3 overflow-x-auto pb-6 md:flex-wrap md:overflow-visible [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           {ORDER.map((cat) => {
             const pressed = cat === active;
             return (
@@ -50,7 +55,7 @@ export function SkillsSection() {
                 className={
                   pressed
                     ? "snap-start rounded-pill border border-teal-300/50 bg-teal-400/[0.1] px-5 py-2 text-xs uppercase tracking-[0.22em] text-white md:snap-none"
-                    : "snap-start rounded-pill border border-white/[0.08] bg-white/[0.03] px-5 py-2 text-xs uppercase tracking-[0.22em] text-white/60 transition hover:border-white/20 hover:text-white md:snap-none"
+                    : "touch-press snap-start rounded-pill border border-white/[0.08] bg-white/[0.03] px-5 py-2 text-xs uppercase tracking-[0.22em] text-white/60 transition hover:border-white/20 hover:text-white md:snap-none"
                 }
               >
                 {cat}
@@ -60,7 +65,12 @@ export function SkillsSection() {
         </div>
 
         <div className="relative mx-auto mt-16 grid min-h-[min(580px,95vw)] w-full max-w-[560px] place-items-center">
-          <motion.div aria-hidden className="orbit-spin absolute inset-[10%] rounded-full border border-dashed border-teal-200/55" animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 6, repeat: Infinity }} />
+          <motion.div
+            aria-hidden
+            className="absolute inset-[10%] rounded-full border border-dashed border-teal-200/55"
+            animate={richMotion ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+            transition={richMotion ? { duration: 6, repeat: Infinity } : { duration: 0 }}
+          />
 
           <div aria-hidden className="absolute inset-[22%] rounded-pill bg-teal-400/[0.06] blur-[48px]" />
 
@@ -70,16 +80,17 @@ export function SkillsSection() {
             return (
               <motion.div
                 key={`${label}-${idx}`}
-                layout
+                layout={richMotion}
                 className="absolute left-1/2 top-1/2 flex w-[4.75rem] flex-col items-center gap-2"
                 style={{
                   left: `${50 + Math.cos(angle) * pct}%`,
                   top: `${50 + Math.sin(angle) * pct}%`,
                   transform: "translate(-50%, -50%)",
                 }}
-                whileHover={{ scale: 1.06 }}
+                whileHover={richMotion ? { scale: 1.06 } : undefined}
+                whileTap={{ scale: 0.94 }}
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/[0.12] bg-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.25)] backdrop-blur-sm transition-colors hover:border-teal-300/45">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/[0.12] bg-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.25)] backdrop-blur-sm transition-colors hover:border-teal-300/45 active:border-teal-300/45">
                   <SkillLogo name={label} className="h-8 w-8" />
                 </div>
                 <span className="text-center text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-white/70">
@@ -89,7 +100,12 @@ export function SkillsSection() {
             );
           })}
 
-          <motion.div aria-hidden className="orbit-spin absolute inset-[4%] rounded-surface-2xl border border-teal-200/35 opacity-70" animate={{ rotate: [-4, 4, -6] }} transition={{ repeat: Infinity, duration: 12 }} />
+          <motion.div
+            aria-hidden
+            className="absolute inset-[4%] rounded-surface-2xl border border-teal-200/35 opacity-70"
+            animate={richMotion ? { rotate: [-4, 4, -6] } : { rotate: 0 }}
+            transition={richMotion ? { repeat: Infinity, duration: 12 } : { duration: 0 }}
+          />
         </div>
       </div>
     </section>
